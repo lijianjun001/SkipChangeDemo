@@ -29,6 +29,10 @@ public class MainActivity extends BaseActivity {
 	 * �������
 	 */
 	protected DexClassLoader classLoader = null;
+	/**
+	 * security check
+	 */
+	private SecurityChecker mSecurityChecker;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +42,7 @@ public class MainActivity extends BaseActivity {
 		tv_skin1 = (TextView) findViewById(R.id.tv_skin1);
 		tv_skin2 = (TextView) findViewById(R.id.tv_skin2);
 		ll_bg = (LinearLayout) findViewById(R.id.ll_bg);
-		//ʹ��ԭ��Ƥ��
+		mSecurityChecker = new SecurityChecker(mContext);
 		tv_skin1.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
@@ -46,16 +50,18 @@ public class MainActivity extends BaseActivity {
 				loadLocalSkin();
 			}
 		});
-		//ʹ������Ƥ��
 		tv_skin2.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
 				String sdPath = Environment.getExternalStorageDirectory().getPath();
 				String filePath = sdPath + File.separator +"skinchange"+ File.separator + "SkinChange2Skin.apk";
+
+				if (!mSecurityChecker.verifyApk(new File(filePath))) {// security check fail
+					return;
+				}
 				classLoader = new DexClassLoader(filePath, getDir("dex", 0)
 						.getAbsolutePath(), null, getClassLoader());
 				loadResources(filePath);
-				//���ַ�ʽ
 				loadOtherSkin();
 				//loadOtherSkin1();
 			}
@@ -83,13 +89,10 @@ public class MainActivity extends BaseActivity {
 			Class clazz = classLoader.loadClass("com.example.skin.UIUtil");
 			Method method = clazz.getMethod("getTilteString");
 			titleID = (int) method.invoke(null);
-			Log.d(TAG, "��ȡ����ID��" + titleID);
 			method = clazz.getMethod("getBtnBgId");
 			btn_bg = (int) method.invoke(null);
-			Log.d(TAG, "��ȡ��ť����ID��" + btn_bg);
 			method = clazz.getMethod("getMyActivityBg");
 			activty_bg = (int) method.invoke(null);
-			Log.d(TAG, "��ȡ����ID��" + activty_bg);
 			showSkin();
 		} catch (Exception e) {
 			Log.e(TAG, "��ȡʧ�ܣ�" + Log.getStackTraceString(e));

@@ -54,5 +54,4 @@ public class BaseActivity extends Activity{
 	    return mResources == null ? super.getResources() : mResources;  
 	}
 	
-
 }
